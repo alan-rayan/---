@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Stars Football Manager Pro</title>
+  <style>
+    :root {
+      --bg: #06120d;
+      --panel: rgba(255, 255, 255, 0.075);
+      --panel-dark: rgba(2, 8, 23, 0.52);
+      --line: rgba(255, 255, 255, 0.11);
+      --text: #f4fff8;
+      --muted: rgba(244, 255, 248, 0.66);
+      --yellow: #facc15;
+      --blue: #38bdf8;
+      --green: #22c55e;
+      --red: #fb7185;
+      --orange: #fb923c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(250, 204, 21, 0.2), transparent 26%),
+        radial-gradient(circle at 85% 20%, rgba(56, 189, 248, 0.22), transparent 30%),
+        radial-gradient(circle at 70% 85%, rgba(34, 197, 94, 0.24), transparent 34%),
+        linear-gradient(135deg, #06140d 0%, #0b1f17 45%, #07111f 100%);
+    }
+
+    button, input, select { font: inherit; }
+
+    .app {
+      width: min(1320px, 100%);
+      margin: 0 auto;
+      padding: 24px 16px 46px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 30px;
+      border: 1px solid rgba(250, 204, 21, 0.22);
+      border-radius: 30px;
+      background:
+        linear-gradient(135deg, rgba(250, 204, 21, 0.12), rgba(56, 189, 248, 0.08)),
+        rgba(5, 20, 14, 0.72);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.38);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero::after {
+      content: "★";
+      position: absolute;
+      right: 30px;
+      top: -28px;
+      font-size: 180px;
+      opacity: 0.1;
+      color: var(--yellow);
+      transform: rotate(-14deg);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(250, 204, 21, 0.38);
+      border-radius: 999px;
+      color: #fef3c7;
+      background: rgba(250, 204, 21, 0.12);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(36px, 6vw, 70px);
+      line-height: 0.95;
+      letter-spacing: -2.8px;
+    }
+
+    .hero p {
+      max-width: 820px;
+      margin: 0;
+      color: rgba(244,255,248,0.8);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1.22fr) minmax(340px, 0.78fr);
+      gap: 18px;
+      margin-top: 18px;
+      align-items: start;
+    }
+
+    .column { display: flex; flex-direction: column; gap: 18px; }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: var(--panel);
+      box-shadow: 0 16px 50px rgba(0,0,0,0.26);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 17px 19px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .panel-header h2 { margin: 0; font-size: 21px; }
+
+    .header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+    .counter, .pill {
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+      background: rgba(250, 204, 21, 0.13);
+      color: #fef3c7;
+      border: 1px solid rgba(250, 204, 21, 0.2);
+    }
+
+    .pill.good { background: rgba(34,197,94,0.13); color: #bbf7d0; border-color: rgba(34,197,94,0.24); }
+    .pill.bad { background: rgba(251,113,133,0.13); color: #fecdd3; border-color: rgba(251,113,133,0.25); }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 14px 18px 0;
+    }
+
+    .filter-btn {
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--muted);
+      background: rgba(2,8,23,0.34);
+      font-weight: 850;
+      transition: .18s ease;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      color: #171100;
+      background: linear-gradient(135deg, var(--yellow), var(--blue));
+      border-color: transparent;
+    }
+
+    .squad-status {
+      margin: 14px 18px 0;
+      padding: 13px 14px;
+      border-radius: 17px;
+      color: var(--muted);
+      background: rgba(2,8,23,0.38);
+      border: 1px solid rgba(255,255,255,0.08);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .squad-status strong { color: #fff; }
+    .squad-status.ok { border-color: rgba(34,197,94,.3); background: rgba(34,197,94,.08); }
+    .squad-status.error { border-color: rgba(251,113,133,.28); background: rgba(251,113,133,.07); }
+
+    .players {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 11px;
+      padding: 14px 18px 18px;
+      max-height: 860px;
+      overflow: auto;
+    }
+
+    .player-card {
+      position: relative;
+      cursor: pointer;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 21px;
+      background:
+        linear-gradient(135deg, rgba(250, 204, 21, 0.07), rgba(14, 165, 233, 0.05)),
+        rgba(2, 8, 23, 0.5);
+      transition: .18s ease;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .player-card:hover { transform: translateY(-2px); border-color: rgba(250,204,21,.42); }
+    .player-card.selected {
+      border-color: rgba(250,204,21,.95);
+      background: linear-gradient(135deg, rgba(250,204,21,.2), rgba(14,165,233,.12)), rgba(2,8,23,.56);
+    }
+
+    .player-card.selected::after {
+      content: "✓";
+      position: absolute;
+      right: 11px;
+      top: 11px;
+      display: grid;
+      place-items: center;
+      width: 23px;
+      height: 23px;
+      border-radius: 50%;
+      color: #271a00;
+      background: var(--yellow);
+      font-weight: 950;
+    }
+
+    .player-top { display: flex; align-items: center; gap: 10px; padding-right: 26px; }
+
+    .avatar {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      color: #06140d;
+      background: linear-gradient(135deg, var(--yellow), var(--blue));
+      font-weight: 950;
+    }
+
+    .avatar.GK { background: linear-gradient(135deg, #c4b5fd, #60a5fa); }
+    .avatar.DF { background: linear-gradient(135deg, #86efac, #22c55e); }
+    .avatar.MF { background: linear-gradient(135deg, #fde68a, #fb923c); }
+    .avatar.FW { background: linear-gradient(135deg, #fda4af, #facc15); }
+
+    .player-name { margin: 0; font-size: 15px; font-weight: 950; }
+    .player-role { margin-top: 3px; color: var(--muted); font-size: 12px; }
+
+    .attributes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-top: 11px;
+    }
+
+    .attribute {
+      padding: 6px 4px;
+      border-radius: 10px;
+      text-align: center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .attribute strong { display: block; font-size: 13px; }
+    .attribute span { display: block; margin-top: 1px; color: var(--muted); font-size: 9px; font-weight: 800; }
+
+    .player-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+    .rating { padding: 6px 9px; border-radius: 11px; color: #171100; background: linear-gradient(135deg,#fef3c7,var(--yellow)); font-weight: 950; }
+    .skill { color: var(--muted); font-size: 12px; text-align: right; }
+
+    .controls { padding: 17px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .full { grid-column: 1 / -1; }
+
+    label { display: block; margin-bottom: 7px; color: rgba(244,255,248,.74); font-size: 13px; font-weight: 850; }
+
+    input, select {
+      width: 100%;
+      margin: 0;
+      padding: 12px 13px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 15px;
+      outline: none;
+      color: #fff;
+      background: rgba(2,8,23,.52);
+    }
+
+    select option { color: #111827; }
+    input:focus, select:focus { border-color: rgba(250,204,21,.58); box-shadow: 0 0 0 3px rgba(250,204,21,.08); }
+
+    .tactics {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid rgba(250,204,21,.14);
+      border-radius: 18px;
+      background: rgba(2,8,23,.34);
+    }
+
+    .tactics-title { margin: 0 0 12px; color: #fef3c7; font-weight: 950; }
+    .tactic-row { margin-bottom: 14px; }
+    .tactic-row:last-child { margin-bottom: 0; }
+    .tactic-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
+    .tactic-head label { margin: 0; }
+    .tactic-head span { color: var(--yellow); font-size: 13px; font-weight: 950; }
+    input[type="range"] { padding: 0; accent-color: var(--yellow); }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .metric {
+      padding: 11px 6px;
+      border-radius: 15px;
+      text-align: center;
+      background: rgba(2,8,23,.43);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .metric strong { display: block; font-size: 22px; }
+    .metric span { color: var(--muted); font-size: 10px; font-weight: 850; }
+
+    .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 14px; }
+
+    button.action {
+      cursor: pointer;
+      border: 0;
+      border-radius: 15px;
+      padding: 12px 13px;
+      font-weight: 950;
+      color: #161000;
+      background: linear-gradient(135deg, var(--yellow), var(--blue));
+      transition: .18s ease;
+      box-shadow: 0 10px 24px rgba(250,204,21,.14);
+    }
+
+    button.action:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); }
+    button.action.secondary { color: #e5fff0; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.12); box-shadow: none; }
+    button.action.danger { color: #ffe4e6; background: rgba(251,113,133,.12); border: 1px solid rgba(251,113,133,.22); box-shadow: none; }
+    button.action:disabled { cursor: not-allowed; opacity: .42; filter: grayscale(.4); }
+
+    .field-wrap { padding: 17px; }
+
+    .field {
+      position: relative;
+      height: 470px;
+      border: 2px solid rgba(255,255,255,.28);
+      border-radius: 25px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.08) 0 7%, transparent 7.3%),
+        linear-gradient(90deg, rgba(255,255,255,.08) 49.7%, rgba(255,255,255,.26) 50%, rgba(255,255,255,.08) 50.3%),
+        repeating-linear-gradient(90deg, rgba(22,163,74,.96) 0, rgba(22,163,74,.96) 54px, rgba(21,128,61,.96) 54px, rgba(21,128,61,.96) 108px);
+      box-shadow: inset 0 0 70px rgba(0,0,0,.25);
+    }
+
+    .field::before {
+      content: "";
+      position: absolute;
+      inset: 15px;
+      border: 2px solid rgba(255,255,255,.28);
+      border-radius: 17px;
+      pointer-events: none;
+    }
+
+    .field::after {
+      content: "WORLD XI";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 104px;
+      height: 104px;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(255,255,255,.25);
+      border-radius: 50%;
+      color: rgba(255,255,255,.52);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 1px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .penalty-box-left, .penalty-box-right {
+      position: absolute;
+      top: 25%;
+      width: 16%;
+      height: 50%;
+      border: 2px solid rgba(255,255,255,.26);
+      pointer-events: none;
+    }
+    .penalty-box-left { left: 15px; border-left: 0; }
+    .penalty-box-right { right: 15px; border-right: 0; }
+
+    .field-player {
+      position: absolute;
+      z-index: 3;
+      width: 68px;
+      min-height: 62px;
+      display: grid;
+      place-items: center;
+      border-radius: 19px;
+      color: #06140d;
+      background: linear-gradient(135deg,#fef3c7,var(--yellow) 48%,var(--blue));
+      font-size: 10px;
+      font-weight: 950;
+      text-align: center;
+      box-shadow: 0 11px 24px rgba(0,0,0,.3);
+      transform: translate(-50%,-50%);
+      border: 2px solid rgba(255,255,255,.76);
+      padding: 5px;
+      animation: pop .23s ease both;
+    }
+
+    .field-player.GK { background: linear-gradient(135deg,#ddd6fe,#60a5fa); }
+    .field-player.DF { background: linear-gradient(135deg,#dcfce7,#22c55e); }
+    .field-player.MF { background: linear-gradient(135deg,#fef3c7,#fb923c); }
+    .field-player.FW { background: linear-gradient(135deg,#ffe4e6,#facc15); }
+    .field-player small { display: block; margin-top: 2px; font-size: 9px; color: rgba(6,20,13,.74); }
+    .field-player em { font-style: normal; font-size: 8px; opacity: .72; }
+
+    @keyframes pop { from { opacity: 0; transform: translate(-50%,-44%) scale(.88); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
+
+    .result-head { padding: 17px 18px 0; }
+    .team-labels { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; font-weight: 850; }
+    .score { display: flex; justify-content: center; align-items: center; gap: 14px; margin: 7px 0 13px; font-size: 46px; font-weight: 950; }
+
+    .message {
+      margin: 0 18px 16px;
+      padding: 13px 14px;
+      border-radius: 17px;
+      color: rgba(244,255,248,.84);
+      background: rgba(2,8,23,.42);
+      line-height: 1.5;
+    }
+
+    .match-summary {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      padding: 0 18px 16px;
+      align-items: center;
+    }
+
+    .match-summary .left { text-align: right; }
+    .match-summary .right { text-align: left; }
+    .summary-row { display: contents; }
+    .summary-value { font-weight: 900; }
+    .summary-label { color: var(--muted); font-size: 11px; text-align: center; white-space: nowrap; }
+
+    .events {
+      max-height: 305px;
+      overflow: auto;
+      padding: 0 18px 18px;
+    }
+
+    .event {
+      display: grid;
+      grid-template-columns: 40px 25px 1fr;
+      gap: 8px;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .event:last-child { border-bottom: 0; }
+    .event-minute { color: var(--yellow); font-weight: 950; }
+    .event-icon { text-align: center; }
+    .event.away { opacity: .82; }
+
+    .history { padding: 13px 18px 18px; }
+    .history-empty { color: var(--muted); font-size: 13px; }
+    .history-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .history-item:last-child { border-bottom: 0; }
+    .history-title { font-size: 13px; font-weight: 850; }
+    .history-meta { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .history-score { font-size: 18px; font-weight: 950; }
+    .win { color: #86efac; }
+    .draw { color: #fde68a; }
+    .loss { color: #fda4af; }
+
+    .season-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 16px 18px 18px; }
+    .season-stat { padding: 12px 5px; text-align: center; border-radius: 15px; background: rgba(2,8,23,.4); border: 1px solid rgba(255,255,255,.08); }
+    .season-stat strong { display: block; font-size: 24px; }
+    .season-stat span { color: var(--muted); font-size: 10px; font-weight: 850; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 20;
+      max-width: min(520px, calc(100vw - 24px));
+      padding: 12px 16px;
+      border-radius: 15px;
+      color: #fff;
+      background: rgba(2,8,23,.94);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 18px 50px rgba(0,0,0,.4);
+      transform: translate(-50%, 120px);
+      opacity: 0;
+      transition: .25s ease;
+      pointer-events: none;
+      font-size: 13px;
+    }
+    .toast.show { transform: translate(-50%,0); opacity: 1; }
+
+    @media (max-width: 1000px) {
+      .dashboard { grid-template-columns: 1fr; }
+      .players { max-height: none; }
+    }
+
+    @media (max-width: 650px) {
+      .app { padding: 12px 10px 34px; }
+      .hero { padding: 23px 18px; border-radius: 24px; }
+      .hero::after { font-size: 120px; right: 5px; }
+      h1 { letter-spacing: -1.8px; }
+      .players { grid-template-columns: 1fr; padding: 12px; }
+      .filters { padding-left: 12px; padding-right: 12px; }
+      .squad-status { margin-left: 12px; margin-right: 12px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .full { grid-column: auto; }
+      .metric-grid { grid-template-columns: repeat(2,1fr); }
+      .buttons { grid-template-columns: 1fr; }
+      .field { height: 390px; }
+      .field-player { width: 55px; min-height: 53px; font-size: 9px; }
+      .field-player small { font-size: 8px; }
+      .score { font-size: 38px; }
+      .season-stats { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="badge">★ World Stars Football Manager Pro</div>
+      <h1>Построй команду.<br>Выиграй матч.</h1>
+      <p>
+        Теперь схема требует правильные позиции, характеристики игроков влияют на стиль игры,
+        а матч создаёт голы, ассисты, карточки, сейвы, владение, удары и настоящего лучшего игрока.
+      </p>
+    </section>
+
+    <section class="dashboard">
+      <div class="column">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Состав мировых звёзд</h2>
+            <div class="header-actions">
+              <div class="counter"><span id="selectedCount">0</span>/11</div>
+              <div class="pill" id="formationPill">4-3-3</div>
+            </div>
+          </div>
+
+          <div class="filters" id="filters"></div>
+          <div class="squad-status" id="squadStatus"></div>
+          <div class="players" id="playersList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Поле World XI</h2>
+            <div class="pill" id="fieldStatus">Состав не готов</div>
+          </div>
+          <div class="field-wrap">
+            <div class="field" id="field">
+              <div class="penalty-box-left"></div>
+              <div class="penalty-box-right"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="column">
+        <section class="panel">
+          <div class="panel-header"><h2>Настройка матча</h2></div>
+          <div class="controls">
+            <div class="form-grid">
+              <div class="full">
+                <label for="clubName">Название клуба</label>
+                <input id="clubName" maxlength="24" value="World Stars FC" />
+              </div>
+
+              <div>
+                <label for="opponent">Соперник</label>
+                <select id="opponent"></select>
+              </div>
+
+              <div>
+                <label for="formation">Схема</label>
+                <select id="formation">
+                  <option value="433">4-3-3</option>
+                  <option value="4231">4-2-3-1</option>
+                  <option value="352">3-5-2</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="style">Стиль игры</label>
+                <select id="style">
+                  <option value="balanced">Сбалансированный</option>
+                  <option value="possession">Контроль мяча</option>
+                  <option value="counter">Контратаки</option>
+                  <option value="attacking">Атакующий</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="tactics">
+              <p class="tactics-title">Тактика</p>
+              <div class="tactic-row">
+                <div class="tactic-head"><label for="pressing">Прессинг</label><span id="pressingValue">55</span></div>
+                <input id="pressing" type="range" min="0" max="100" value="55" />
+              </div>
+              <div class="tactic-row">
+                <div class="tactic-head"><label for="highLine">Высота обороны</label><span id="highLineValue">50</span></div>
+                <input id="highLine" type="range" min="0" max="100" value="50" />
+              </div>
+              <div class="tactic-row">
+                <div class="tactic-head"><label for="tempo">Темп атаки</label><span id="tempoValue">55</span></div>
+                <input id="tempo" type="range" min="0" max="100" value="55" />
+              </div>
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric"><strong id="teamRating">0</strong><span>СИЛА</span></div>
+              <div class="metric"><strong id="chemistry">0</strong><span>СЫГРАННОСТЬ</span></div>
+              <div class="metric"><strong id="attackMetric">0</strong><span>АТАКА</span></div>
+              <div class="metric"><strong id="defenseMetric">0</strong><span>ЗАЩИТА</span></div>
+            </div>
+
+            <div class="buttons">
+              <button class="action" id="autoBtn">Автосостав</button>
+              <button class="action secondary" id="clearBtn">Очистить</button>
+              <button class="action" id="playBtn" disabled>Играть матч</button>
+              <button class="action danger" id="resetBtn">Сбросить карьеру</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header"><h2>Результат матча</h2><div class="pill" id="motmPill">MVP —</div></div>
+          <div class="result-head">
+            <div class="team-labels"><span id="homeLabel">World Stars FC</span><span id="awayLabel">Real Madrid</span></div>
+            <div class="score"><span id="homeGoals">-</span><span>:</span><span id="awayGoals">-</span></div>
+          </div>
+          <div class="message" id="matchMessage">Собери правильный состав и сыграй первый матч.</div>
+          <div class="match-summary" id="matchSummary"></div>
+          <div class="events" id="events"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header"><h2>Карьера тренера</h2><div class="pill good" id="coachRatingPill">Рейтинг 50</div></div>
+          <div class="season-stats">
+            <div class="season-stat"><strong id="matches">0</strong><span>МАТЧИ</span></div>
+            <div class="season-stat"><strong id="wins">0</strong><span>ПОБЕДЫ</span></div>
+            <div class="season-stat"><strong id="draws">0</strong><span>НИЧЬИ</span></div>
+            <div class="season-stat"><strong id="losses">0</strong><span>ПОРАЖЕНИЯ</span></div>
+          </div>
+          <div class="history" id="history"></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const players = [
+      { name: "Lionel Messi", pos: "FW", rating: 94, attack: 96, passing: 95, defense: 35, speed: 84, stamina: 75, skill: "дриблинг и последний пас" },
+      { name: "Cristiano Ronaldo", pos: "FW", rating: 93, attack: 96, passing: 82, defense: 38, speed: 88, stamina: 86, skill: "удар и игра головой" },
+      { name: "Kylian Mbappé", pos: "FW", rating: 92, attack: 94, passing: 84, defense: 35, speed: 99, stamina: 88, skill: "скорость и рывок" },
+      { name: "Erling Haaland", pos: "FW", rating: 91, attack: 95, passing: 74, defense: 42, speed: 91, stamina: 88, skill: "завершение атак" },
+      { name: "Vinícius Jr", pos: "FW", rating: 90, attack: 90, passing: 83, defense: 37, speed: 97, stamina: 87, skill: "обводка на фланге" },
+      { name: "Neymar Jr", pos: "FW", rating: 90, attack: 91, passing: 91, defense: 34, speed: 88, stamina: 71, skill: "финты и креатив" },
+      { name: "Mohamed Salah", pos: "FW", rating: 91, attack: 93, passing: 85, defense: 45, speed: 93, stamina: 89, skill: "смещение и удар" },
+      { name: "Harry Kane", pos: "FW", rating: 91, attack: 94, passing: 88, defense: 46, speed: 78, stamina: 84, skill: "завершение и пас" },
+
+      { name: "Kevin De Bruyne", pos: "MF", rating: 92, attack: 88, passing: 96, defense: 66, speed: 78, stamina: 84, skill: "гениальный пас" },
+      { name: "Luka Modrić", pos: "MF", rating: 90, attack: 81, passing: 94, defense: 73, speed: 72, stamina: 82, skill: "контроль темпа" },
+      { name: "Jude Bellingham", pos: "MF", rating: 91, attack: 88, passing: 88, defense: 82, speed: 85, stamina: 92, skill: "мощь в центре" },
+      { name: "Toni Kroos", pos: "MF", rating: 89, attack: 78, passing: 96, defense: 72, speed: 65, stamina: 78, skill: "дальний пас" },
+      { name: "Rodri", pos: "MF", rating: 92, attack: 76, passing: 92, defense: 91, speed: 68, stamina: 89, skill: "баланс и отбор" },
+      { name: "Bruno Fernandes", pos: "MF", rating: 89, attack: 87, passing: 91, defense: 67, speed: 77, stamina: 89, skill: "креатив и удары" },
+      { name: "Federico Valverde", pos: "MF", rating: 89, attack: 83, passing: 87, defense: 82, speed: 88, stamina: 95, skill: "объём работы" },
+      { name: "Pedri", pos: "MF", rating: 88, attack: 78, passing: 92, defense: 68, speed: 76, stamina: 80, skill: "короткий пас" },
+
+      { name: "Virgil van Dijk", pos: "DF", rating: 91, attack: 60, passing: 82, defense: 95, speed: 84, stamina: 86, skill: "лидер обороны" },
+      { name: "Rúben Dias", pos: "DF", rating: 90, attack: 55, passing: 80, defense: 94, speed: 78, stamina: 88, skill: "позиционная защита" },
+      { name: "Achraf Hakimi", pos: "DF", rating: 88, attack: 83, passing: 82, defense: 82, speed: 96, stamina: 92, skill: "скорость справа" },
+      { name: "Theo Hernández", pos: "DF", rating: 88, attack: 82, passing: 79, defense: 82, speed: 95, stamina: 91, skill: "рывок слева" },
+      { name: "João Cancelo", pos: "DF", rating: 88, attack: 82, passing: 88, defense: 78, speed: 86, stamina: 84, skill: "подключения в атаку" },
+      { name: "Antonio Rüdiger", pos: "DF", rating: 88, attack: 55, passing: 76, defense: 91, speed: 89, stamina: 90, skill: "силовая игра" },
+      { name: "William Saliba", pos: "DF", rating: 89, attack: 52, passing: 80, defense: 92, speed: 88, stamina: 89, skill: "скорость и чтение" },
+      { name: "Trent Alexander-Arnold", pos: "DF", rating: 87, attack: 79, passing: 93, defense: 76, speed: 82, stamina: 86, skill: "длинные передачи" },
+
+      { name: "Thibaut Courtois", pos: "GK", rating: 91, attack: 12, passing: 78, defense: 95, speed: 48, stamina: 82, skill: "реакция и рост" },
+      { name: "Alisson Becker", pos: "GK", rating: 91, attack: 14, passing: 86, defense: 94, speed: 54, stamina: 84, skill: "сейвы и пас" },
+      { name: "Manuel Neuer", pos: "GK", rating: 89, attack: 18, passing: 91, defense: 91, speed: 58, stamina: 81, skill: "игра ногами" },
+      { name: "Gianluigi Donnarumma", pos: "GK", rating: 89, attack: 10, passing: 74, defense: 92, speed: 47, stamina: 80, skill: "реакция на линии" }
+    ];
+
+    const opponents = [
+      { name: "Real Madrid", power: 91, attack: 93, defense: 90, style: "counter" },
+      { name: "Manchester City", power: 92, attack: 92, defense: 91, style: "possession" },
+      { name: "Barcelona", power: 89, attack: 90, defense: 87, style: "possession" },
+      { name: "Bayern Munich", power: 90, attack: 92, defense: 88, style: "attacking" },
+      { name: "PSG", power: 88, attack: 91, defense: 84, style: "attacking" },
+      { name: "Liverpool", power: 89, attack: 90, defense: 88, style: "pressing" },
+      { name: "Inter", power: 88, attack: 86, defense: 91, style: "counter" },
+      { name: "Arsenal", power: 89, attack: 89, defense: 89, style: "balanced" }
+    ];
+
+    const formations = {
+      "433": {
+        label: "4-3-3",
+        need: { GK: 1, DF: 4, MF: 3, FW: 3 },
+        positions: {
+          GK: [{ x: 8, y: 50 }],
+          DF: [{ x: 25, y: 17 }, { x: 25, y: 39 }, { x: 25, y: 61 }, { x: 25, y: 83 }],
+          MF: [{ x: 50, y: 27 }, { x: 48, y: 50 }, { x: 50, y: 73 }],
+          FW: [{ x: 77, y: 20 }, { x: 83, y: 50 }, { x: 77, y: 80 }]
+        },
+        mods: { attack: 2, defense: 0, possession: 0 }
+      },
+      "4231": {
+        label: "4-2-3-1",
+        need: { GK: 1, DF: 4, MF: 5, FW: 1 },
+        positions: {
+          GK: [{ x: 8, y: 50 }],
+          DF: [{ x: 25, y: 17 }, { x: 25, y: 39 }, { x: 25, y: 61 }, { x: 25, y: 83 }],
+          MF: [{ x: 43, y: 38 }, { x: 43, y: 62 }, { x: 62, y: 20 }, { x: 62, y: 50 }, { x: 62, y: 80 }],
+          FW: [{ x: 83, y: 50 }]
+        },
+        mods: { attack: 0, defense: 2, possession: 2 }
+      },
+      "352": {
+        label: "3-5-2",
+        need: { GK: 1, DF: 3, MF: 5, FW: 2 },
+        positions: {
+          GK: [{ x: 8, y: 50 }],
+          DF: [{ x: 27, y: 27 }, { x: 25, y: 50 }, { x: 27, y: 73 }],
+          MF: [{ x: 49, y: 13 }, { x: 48, y: 33 }, { x: 46, y: 50 }, { x: 48, y: 67 }, { x: 49, y: 87 }],
+          FW: [{ x: 79, y: 36 }, { x: 79, y: 64 }]
+        },
+        mods: { attack: 1, defense: -1, possession: 3 }
+      }
+    };
+
+    const state = {
+      selected: [],
+      filter: "ALL",
+      career: { matches: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, coachRating: 50, history: [] }
+    };
+
+    const els = {
+      playersList: document.getElementById("playersList"),
+      selectedCount: document.getElementById("selectedCount"),
+      filters: document.getElementById("filters"),
+      squadStatus: document.getElementById("squadStatus"),
+      formationPill: document.getElementById("formationPill"),
+      fieldStatus: document.getElementById("fieldStatus"),
+      field: document.getElementById("field"),
+      clubName: document.getElementById("clubName"),
+      opponent: document.getElementById("opponent"),
+      formation: document.getElementById("formation"),
+      style: document.getElementById("style"),
+      pressing: document.getElementById("pressing"),
+      highLine: document.getElementById("highLine"),
+      tempo: document.getElementById("tempo"),
+      pressingValue: document.getElementById("pressingValue"),
+      highLineValue: document.getElementById("highLineValue"),
+      tempoValue: document.getElementById("tempoValue"),
+      teamRating: document.getElementById("teamRating"),
+      chemistry: document.getElementById("chemistry"),
+      attackMetric: document.getElementById("attackMetric"),
+      defenseMetric: document.getElementById("defenseMetric"),
+      autoBtn: document.getElementById("autoBtn"),
+      clearBtn: document.getElementById("clearBtn"),
+      playBtn: document.getElementById("playBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      homeLabel: document.getElementById("homeLabel"),
+      awayLabel: document.getElementById("awayLabel"),
+      homeGoals: document.getElementById("homeGoals"),
+      awayGoals: document.getElementById("awayGoals"),
+      matchMessage: document.getElementById("matchMessage"),
+      matchSummary: document.getElementById("matchSummary"),
+      events: document.getElementById("events"),
+      motmPill: document.getElementById("motmPill"),
+      matches: document.getElementById("matches"),
+      wins: document.getElementById("wins"),
+      draws: document.getElementById("draws"),
+      losses: document.getElementById("losses"),
+      history: document.getElementById("history"),
+      coachRatingPill: document.getElementById("coachRatingPill"),
+      toast: document.getElementById("toast")
+    };
+
+    function init() {
+      opponents.forEach((team, index) => {
+        const option = document.createElement("option");
+        option.value = String(index);
+        option.textContent = `${team.name} — сила ${team.power}`;
+        els.opponent.appendChild(option);
+      });
+
+      renderFilters();
+      loadState();
+      bindEvents();
+      updateAll();
+    }
+
+    function bindEvents() {
+      els.autoBtn.addEventListener("click", autoPick);
+      els.clearBtn.addEventListener("click", clearSelection);
+      els.playBtn.addEventListener("click", playMatch);
+      els.resetBtn.addEventListener("click", resetCareer);
+
+      els.clubName.addEventListener("input", () => { updateLabels(); saveState(); });
+      els.opponent.addEventListener("change", () => { updateLabels(); saveState(); });
+      els.formation.addEventListener("change", () => {
+        updateAll();
+        showToast(`Схема изменена на ${getFormation().label}. Проверь требования к составу.`);
+        saveState();
+      });
+      els.style.addEventListener("change", () => { updateMetrics(); saveState(); });
+
+      [els.pressing, els.highLine, els.tempo].forEach(input => {
+        input.addEventListener("input", () => {
+          updateTacticLabels();
+          updateMetrics();
+          renderField();
+          saveState();
+        });
+      });
+    }
+
+    function renderFilters() {
+      const filters = [
+        { id: "ALL", label: "Все" },
+        { id: "GK", label: "Вратари" },
+        { id: "DF", label: "Защитники" },
+        { id: "MF", label: "Полузащитники" },
+        { id: "FW", label: "Нападающие" },
+        { id: "SELECTED", label: "Выбраны" }
+      ];
+
+      els.filters.innerHTML = "";
+      filters.forEach(filter => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `filter-btn${state.filter === filter.id ? " active" : ""}`;
+        button.textContent = filter.label;
+        button.addEventListener("click", () => {
+          state.filter = filter.id;
+          renderFilters();
+          renderPlayers();
+        });
+        els.filters.appendChild(button);
+      });
+    }
+
+    function renderPlayers() {
+      els.playersList.innerHTML = "";
+      const filtered = players
+        .map((player, index) => ({ ...player, index }))
+        .filter(player => {
+          if (state.filter === "ALL") return true;
+          if (state.filter === "SELECTED") return state.selected.includes(player.index);
+          return player.pos === state.filter;
+        });
+
+      filtered.forEach(player => {
+        const card = document.createElement("article");
+        card.className = `player-card${state.selected.includes(player.index) ? " selected" : ""}`;
+        card.innerHTML = `
+          <div class="player-top">
+            <div class="avatar ${player.pos}">${player.pos}</div>
+            <div>
+              <p class="player-name">${player.name}</p>
+              <div class="player-role">${positionName(player.pos)}</div>
+            </div>
+          </div>
+          <div class="attributes">
+            <div class="attribute"><strong>${player.attack}</strong><span>АТК</span></div>
+            <div class="attribute"><strong>${player.passing}</strong><span>ПАС</span></div>
+            <div class="attribute"><strong>${player.defense}</strong><span>ЗАЩ</span></div>
+            <div class="attribute"><strong>${player.stamina}</strong><span>ВЫН</span></div>
+          </div>
+          <div class="player-bottom">
+            <div class="rating">${player.rating}</div>
+            <div class="skill">${player.skill}</div>
+          </div>
+        `;
+        card.addEventListener("click", () => togglePlayer(player.index));
+        els.playersList.appendChild(card);
+      });
+
+      if (!filtered.length) {
+        els.playersList.innerHTML = `<div class="squad-status">В этом разделе пока нет игроков.</div>`;
+      }
+    }
+
+    function togglePlayer(index) {
+      if (state.selected.includes(index)) {
+        state.selected = state.selected.filter(item => item !== index);
+      } else {
+        if (state.selected.length >= 11) {
+          showToast("В составе уже 11 игроков. Сначала убери одного футболиста.");
+          return;
+        }
+        state.selected.push(index);
+      }
+      updateAll();
+      saveState();
+    }
+
+    function autoPick() {
+      const formation = getFormation();
+      state.selected = [];
+      Object.entries(formation.need).forEach(([pos, count]) => {
+        players
+          .map((player, index) => ({ ...player, index }))
+          .filter(player => player.pos === pos)
+          .sort((a, b) => positionScore(b) - positionScore(a))
+          .slice(0, count)
+          .forEach(player => state.selected.push(player.index));
+      });
+      updateAll();
+      saveState();
+      showToast(`Автосостав для схемы ${formation.label} готов.`);
+    }
+
+    function clearSelection() {
+      state.selected = [];
+      updateAll();
+      saveState();
+      showToast("Состав очищен.");
+    }
+
+    function resetCareer() {
+      const confirmed = window.confirm("Сбросить состав, статистику и историю матчей?");
+      if (!confirmed) return;
+
+      state.selected = [];
+      state.career = { matches: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, coachRating: 50, history: [] };
+      els.homeGoals.textContent = "-";
+      els.awayGoals.textContent = "-";
+      els.matchMessage.textContent = "Карьера сброшена. Собери новый состав.";
+      els.matchSummary.innerHTML = "";
+      els.events.innerHTML = "";
+      els.motmPill.textContent = "MVP —";
+      updateAll();
+      saveState();
+    }
+
+    function updateAll() {
+      renderPlayers();
+      renderSquadStatus();
+      renderField();
+      updateTacticLabels();
+      updateMetrics();
+      updateLabels();
+      updateCareer();
+    }
+
+    function getFormation() { return formations[els.formation.value]; }
+    function getPicked() { return state.selected.map(index => players[index]).filter(Boolean); }
+
+    function countPositions() {
+      return getPicked().reduce((acc, player) => {
+        acc[player.pos] = (acc[player.pos] || 0) + 1;
+        return acc;
+      }, { GK: 0, DF: 0, MF: 0, FW: 0 });
+    }
+
+    function validateSquad() {
+      const formation = getFormation();
+      const counts = countPositions();
+      const missing = [];
+      const extra = [];
+
+      Object.entries(formation.need).forEach(([pos, required]) => {
+        const actual = counts[pos] || 0;
+        if (actual < required) missing.push({ pos, count: required - actual });
+        if (actual > required) extra.push({ pos, count: actual - required });
+      });
+
+      return { valid: state.selected.length === 11 && missing.length === 0 && extra.length === 0, missing, extra, counts };
+    }
+
+    function renderSquadStatus() {
+      const formation = getFormation();
+      const validation = validateSquad();
+      els.selectedCount.textContent = state.selected.length;
+      els.formationPill.textContent = formation.label;
+
+      const requirement = Object.entries(formation.need)
+        .map(([pos, count]) => `${positionName(pos)}: ${count}`)
+        .join(" · ");
+
+      if (validation.valid) {
+        els.squadStatus.className = "squad-status ok";
+        els.squadStatus.innerHTML = `<strong>Состав готов.</strong> ${requirement}`;
+        els.fieldStatus.className = "pill good";
+        els.fieldStatus.textContent = "Состав готов";
+        els.playBtn.disabled = false;
+        return;
+      }
+
+      const problems = [];
+      validation.missing.forEach(item => problems.push(`не хватает: ${positionName(item.pos).toLowerCase()} ×${item.count}`));
+      validation.extra.forEach(item => problems.push(`лишние: ${positionName(item.pos).toLowerCase()} ×${item.count}`));
+      if (state.selected.length < 11) problems.push(`свободных мест: ${11 - state.selected.length}`);
+
+      els.squadStatus.className = `squad-status${state.selected.length ? " error" : ""}`;
+      els.squadStatus.innerHTML = `<strong>Требования ${formation.label}:</strong> ${requirement}.<br>${problems.join(" · ") || "Выбери игроков."}`;
+      els.fieldStatus.className = "pill bad";
+      els.fieldStatus.textContent = "Состав не готов";
+      els.playBtn.disabled = true;
+    }
+
+    function renderField() {
+      els.field.querySelectorAll(".field-player").forEach(node => node.remove());
+      const formation = getFormation();
+      const lineShift = Number(els.highLine.value) >= 70 ? 4 : Number(els.highLine.value) <= 30 ? -3 : 0;
+      const assigned = assignPlayersToSlots();
+
+      Object.entries(formation.positions).forEach(([pos, slots]) => {
+        slots.forEach((slot, slotIndex) => {
+          const player = assigned[pos][slotIndex];
+          if (!player) return;
+          const dot = document.createElement("div");
+          dot.className = `field-player ${player.pos}`;
+          const shiftedX = pos === "GK" || pos === "FW" ? slot.x : slot.x + lineShift;
+          dot.style.left = `${shiftedX}%`;
+          dot.style.top = `${slot.y}%`;
+          dot.innerHTML = `${shortName(player.name)}<small>${player.rating}</small><em>${player.pos}</em>`;
+          els.field.appendChild(dot);
+        });
+      });
+    }
+
+    function assignPlayersToSlots() {
+      const grouped = { GK: [], DF: [], MF: [], FW: [] };
+      getPicked().forEach(player => grouped[player.pos].push(player));
+      Object.keys(grouped).forEach(pos => grouped[pos].sort((a, b) => positionScore(b) - positionScore(a)));
+      return grouped;
+    }
+
+    function positionScore(player) {
+      if (player.pos === "GK") return player.defense * .72 + player.passing * .12 + player.rating * .16;
+      if (player.pos === "DF") return player.defense * .55 + player.speed * .15 + player.passing * .12 + player.stamina * .1 + player.rating * .08;
+      if (player.pos === "MF") return player.passing * .42 + player.stamina * .18 + player.defense * .16 + player.attack * .16 + player.rating * .08;
+      return player.attack * .5 + player.speed * .2 + player.passing * .12 + player.stamina * .1 + player.rating * .08;
+    }
+
+    function calculateMetrics() {
+      const picked = getPicked();
+      if (!picked.length) return { rating: 0, chemistry: 0, attack: 0, defense: 0, midfield: 0, stamina: 0 };
+
+      const formation = getFormation();
+      const validation = validateSquad();
+      const byPos = assignPlayersToSlots();
+      const avg = key => picked.reduce((sum, p) => sum + p[key], 0) / picked.length;
+      const positionalAttack = average([
+        ...byPos.FW.map(p => p.attack),
+        ...byPos.MF.map(p => p.attack * .72 + p.passing * .28),
+        ...byPos.DF.map(p => p.attack * .35)
+      ]);
+      const positionalDefense = average([
+        ...byPos.GK.map(p => p.defense * 1.08),
+        ...byPos.DF.map(p => p.defense),
+        ...byPos.MF.map(p => p.defense * .55),
+        ...byPos.FW.map(p => p.defense * .2)
+      ]);
+      const midfield = average(byPos.MF.map(p => p.passing * .62 + p.defense * .18 + p.stamina * .2));
+
+      let chemistry = 40 + state.selected.length * 3;
+      if (validation.valid) chemistry += 20;
+      chemistry += Math.min(12, avg("passing") / 8);
+      chemistry -= validation.missing.reduce((sum, item) => sum + item.count * 8, 0);
+      chemistry -= validation.extra.reduce((sum, item) => sum + item.count * 7, 0);
+      chemistry = clamp(Math.round(chemistry), 0, 100);
+
+      const style = els.style.value;
+      const pressing = Number(els.pressing.value);
+      const highLine = Number(els.highLine.value);
+      const tempo = Number(els.tempo.value);
+
+      let attack = positionalAttack + formation.mods.attack;
+      let defense = positionalDefense + formation.mods.defense;
+      let midfieldValue = midfield + formation.mods.possession;
+
+      if (style === "attacking") { attack += 4; defense -= 2; }
+      if (style === "counter") { attack += avg("speed") * .035; defense += 1; midfieldValue -= 1; }
+      if (style === "possession") { midfieldValue += 4; attack += 1; }
+      if (style === "balanced") { defense += 1; midfieldValue += 1; }
+
+      attack += (tempo - 50) * .055 + (pressing - 50) * .025;
+      defense += (pressing - 50) * .02 - Math.max(0, highLine - 65) * .07;
+
+      const rating = avg("rating") * .72 + chemistry * .16 + attack * .06 + defense * .06;
+
+      return {
+        rating: clamp(Math.round(rating), 0, 99),
+        chemistry,
+        attack: clamp(Math.round(attack), 0, 99),
+        defense: clamp(Math.round(defense), 0, 99),
+        midfield: clamp(Math.round(midfieldValue), 0, 99),
+        stamina: Math.round(avg("stamina"))
+      };
+    }
+
+    function updateMetrics() {
+      const metrics = calculateMetrics();
+      els.teamRating.textContent = metrics.rating;
+      els.chemistry.textContent = metrics.chemistry;
+      els.attackMetric.textContent = metrics.attack;
+      els.defenseMetric.textContent = metrics.defense;
+    }
+
+    function updateTacticLabels() {
+      els.pressingValue.textContent = els.pressing.value;
+      els.highLineValue.textContent = els.highLine.value;
+      els.tempoValue.textContent = els.tempo.value;
+    }
+
+    function updateLabels() {
+      els.homeLabel.textContent = clubName();
+      els.awayLabel.textContent = currentOpponent().name;
+    }
+
+    function playMatch() {
+      if (!validateSquad().valid) {
+        showToast("Сначала собери правильный состав для выбранной схемы.");
+        return;
+      }
+
+      const simulation = simulateMatch();
+      renderMatch(simulation);
+      updateCareerAfterMatch(simulation);
+      updateCareer();
+      saveState();
+    }
+
+    function simulateMatch() {
+      const metrics = calculateMetrics();
+      const rival = currentOpponent();
+      const pressing = Number(els.pressing.value);
+      const highLine = Number(els.highLine.value);
+      const tempo = Number(els.tempo.value);
+      const style = els.style.value;
+      const picked = getPicked();
+
+      const fatiguePenalty = Math.max(0, pressing - 65) * .045 + Math.max(0, tempo - 70) * .035 - Math.max(0, metrics.stamina - 82) * .08;
+      const counterRisk = Math.max(0, highLine - 62) * .055;
+      const possessionBase = 50 + (metrics.midfield - rival.power) * .65;
+      const stylePossession = style === "possession" ? 7 : style === "counter" ? -5 : style === "attacking" ? 1 : 0;
+      const possession = clamp(Math.round(possessionBase + stylePossession + randomBetween(-4, 4)), 32, 68);
+
+      let homeXg = 1.18 + (metrics.attack - rival.defense) * .052 + (possession - 50) * .018 + (tempo - 50) * .009;
+      let awayXg = 1.10 + (rival.attack - metrics.defense) * .052 + (50 - possession) * .016 + counterRisk * .03 + fatiguePenalty * .025;
+
+      if (style === "counter") homeXg += rival.style === "possession" ? .22 : .05;
+      if (style === "possession") awayXg -= .08;
+      if (style === "attacking") { homeXg += .2; awayXg += .15; }
+      if (pressing >= 78) { homeXg += .1; awayXg += fatiguePenalty * .04; }
+
+      homeXg = clamp(homeXg, .25, 3.4);
+      awayXg = clamp(awayXg, .22, 3.25);
+
+      const homeGoals = poisson(homeXg);
+      const awayGoals = poisson(awayXg);
+      const homeShots = clamp(Math.round(homeXg * 5.1 + possession * .075 + randomBetween(-2, 3)), 4, 24);
+      const awayShots = clamp(Math.round(awayXg * 5.1 + (100 - possession) * .075 + randomBetween(-2, 3)), 4, 24);
+      const homeOnTarget = clamp(Math.round(homeShots * randomBetween(.34, .52)), Math.min(homeGoals, homeShots), homeShots);
+      const awayOnTarget = clamp(Math.round(awayShots * randomBetween(.34, .52)), Math.min(awayGoals, awayShots), awayShots);
+      const homeCorners = clamp(Math.round(homeShots * .3 + randomBetween(-1, 2)), 0, 11);
+      const awayCorners = clamp(Math.round(awayShots * .3 + randomBetween(-1, 2)), 0, 11);
+      const homeFouls = clamp(Math.round(8 + pressing * .055 + randomBetween(-3, 3)), 5, 20);
+      const awayFouls = clamp(Math.round(10 + randomBetween(-3, 4)), 5, 20);
+
+      const events = generateEvents({ homeGoals, awayGoals, homeShots, awayShots, homeFouls, awayFouls, picked, rival, pressing, fatiguePenalty });
+      const motm = chooseMotm(events, picked, homeGoals, awayGoals);
+
+      return {
+        homeGoals, awayGoals,
+        homeXg: round1(homeXg), awayXg: round1(awayXg),
+        possession,
+        homeShots, awayShots,
+        homeOnTarget, awayOnTarget,
+        homeCorners, awayCorners,
+        homeFouls, awayFouls,
+        metrics, rival, events, motm,
+        fatiguePenalty: round1(fatiguePenalty)
+      };
+    }
+
+    function generateEvents(data) {
+      const events = [];
+      const goalMinutes = uniqueMinutes(data.homeGoals + data.awayGoals, 4, 90);
+      const homeGoalSlots = shuffle([...Array(data.homeGoals).fill("home"), ...Array(data.awayGoals).fill("away")]);
+      const attackers = data.picked.filter(p => p.pos === "FW" || p.pos === "MF");
+      const creators = data.picked.filter(p => p.pos === "MF" || p.passing >= 88);
+      const defenders = data.picked.filter(p => p.pos === "DF" || p.pos === "GK");
+
+      goalMinutes.forEach((minute, i) => {
+        const side = homeGoalSlots[i];
+        if (side === "home") {
+          const scorer = weightedPick(attackers.length ? attackers : data.picked, p => p.attack + p.speed * .2);
+          const possibleAssists = creators.filter(p => p.name !== scorer.name);
+          const assister = possibleAssists.length && Math.random() < .78 ? weightedPick(possibleAssists, p => p.passing) : null;
+          events.push({ minute, side, type: "goal", icon: "⚽", text: `ГОЛ! ${scorer.name}${assister ? `, ассист — ${assister.name}` : ""}.`, player: scorer.name, assist: assister?.name || null });
+        } else {
+          events.push({ minute, side, type: "goal", icon: "⚽", text: `${data.rival.name} забивает после ${data.rival.style === "counter" ? "быстрой контратаки" : "опасной комбинации"}.` });
+        }
+      });
+
+      const saveCount = clamp(Math.round((data.awayShots - data.awayGoals) * .18), 1, 4);
+      const goalkeeper = data.picked.find(p => p.pos === "GK");
+      uniqueMinutes(saveCount, 5, 88).forEach(minute => {
+        events.push({ minute, side: "home", type: "save", icon: "🧤", text: `${goalkeeper.name} спасает команду после опасного удара.`, player: goalkeeper.name });
+      });
+
+      const chanceCount = clamp(Math.round((data.homeShots + data.awayShots) / 9), 2, 5);
+      uniqueMinutes(chanceCount, 6, 86).forEach((minute, index) => {
+        const homeChance = index % 2 === 0;
+        if (homeChance) {
+          const player = weightedPick(attackers.length ? attackers : data.picked, p => p.attack);
+          const outcomes = ["бьёт рядом со штангой", "попадает в перекладину", "не реализует выход один на один"];
+          events.push({ minute, side: "home", type: "chance", icon: "🔥", text: `${player.name} ${randomItem(outcomes)}.`, player: player.name });
+        } else {
+          events.push({ minute, side: "away", type: "chance", icon: "⚠️", text: `${data.rival.name} создаёт опасный момент, но удар проходит мимо.` });
+        }
+      });
+
+      const homeCards = Math.random() < clamp(data.homeFouls / 22, .2, .75) ? (Math.random() < .25 ? 2 : 1) : 0;
+      uniqueMinutes(homeCards, 18, 84).forEach(minute => {
+        const player = weightedPick(defenders.length ? defenders : data.picked, p => p.defense);
+        events.push({ minute, side: "home", type: "card", icon: "🟨", text: `${player.name} получает жёлтую карточку.`, player: player.name });
+      });
+
+      if (data.fatiguePenalty > 1.2) {
+        events.push({ minute: randomInt(70, 84), side: "home", type: "fatigue", icon: "🔋", text: "Команда заметно устала из-за высокого прессинга и темпа." });
+      }
+
+      events.push({ minute: 1, side: "neutral", type: "start", icon: "▶️", text: `Матч начался. ${clubName()} играет против ${data.rival.name}.` });
+      events.push({ minute: 90, side: "neutral", type: "end", icon: "🏁", text: "Финальный свисток." });
+      return events.sort((a, b) => a.minute - b.minute);
+    }
+
+    function chooseMotm(events, picked, homeGoals, awayGoals) {
+      const scores = new Map(picked.map(player => [player.name, player.rating / 20]));
+      events.forEach(event => {
+        if (!event.player || !scores.has(event.player)) return;
+        let bonus = 0;
+        if (event.type === "goal") bonus += 3;
+        if (event.type === "save") bonus += 1.2;
+        if (event.type === "chance") bonus += .25;
+        if (event.type === "card") bonus -= .7;
+        scores.set(event.player, scores.get(event.player) + bonus);
+        if (event.assist && scores.has(event.assist)) scores.set(event.assist, scores.get(event.assist) + 1.8);
+      });
+
+      if (homeGoals < awayGoals) {
+        const goalkeeper = picked.find(p => p.pos === "GK");
+        if (goalkeeper) scores.set(goalkeeper.name, scores.get(goalkeeper.name) + .7);
+      }
+
+      const [name, score] = [...scores.entries()].sort((a, b) => b[1] - a[1])[0];
+      return { name, rating: clamp(round1(6.2 + score * .35), 6, 10) };
+    }
+
+    function renderMatch(match) {
+      els.homeGoals.textContent = match.homeGoals;
+      els.awayGoals.textContent = match.awayGoals;
+      els.motmPill.textContent = `MVP ${shortName(match.motm.name)} ${match.motm.rating}`;
+
+      const resultText = match.homeGoals > match.awayGoals
+        ? `Победа! ${clubName()} оказался сильнее.`
+        : match.homeGoals < match.awayGoals
+          ? `Поражение. ${match.rival.name} лучше использовал свои моменты.`
+          : "Ничья. Команды не смогли определить победителя.";
+
+      const tacticNote = match.fatiguePenalty > 1.2
+        ? " Высокая нагрузка ухудшила игру команды в концовке."
+        : match.possession >= 56
+          ? " Команда уверенно контролировала мяч."
+          : match.possession <= 44
+            ? " Команда чаще играла без мяча и искала контратаки."
+            : " Матч получился равным по контролю мяча.";
+
+      els.matchMessage.textContent = `${resultText}${tacticNote} Лучший игрок — ${match.motm.name}.`;
+
+      const rows = [
+        [match.possession + "%", "Владение", (100 - match.possession) + "%"],
+        [match.homeShots, "Удары", match.awayShots],
+        [match.homeOnTarget, "В створ", match.awayOnTarget],
+        [match.homeXg, "xG", match.awayXg],
+        [match.homeCorners, "Угловые", match.awayCorners],
+        [match.homeFouls, "Фолы", match.awayFouls]
+      ];
+
+      els.matchSummary.innerHTML = rows.map(row => `
+        <div class="summary-value left">${row[0]}</div>
+        <div class="summary-label">${row[1]}</div>
+        <div class="summary-value right">${row[2]}</div>
+      `).join("");
+
+      els.events.innerHTML = match.events.map(event => `
+        <div class="event ${event.side === "away" ? "away" : ""}">
+          <div class="event-minute">${event.minute}'</div>
+          <div class="event-icon">${event.icon}</div>
+          <div>${event.text}</div>
+        </div>
+      `).join("");
+    }
+
+    function updateCareerAfterMatch(match) {
+      const c = state.career;
+      c.matches += 1;
+      c.goalsFor += match.homeGoals;
+      c.goalsAgainst += match.awayGoals;
+
+      let result;
+      if (match.homeGoals > match.awayGoals) {
+        c.wins += 1;
+        c.coachRating = clamp(c.coachRating + 3, 0, 100);
+        result = "win";
+      } else if (match.homeGoals < match.awayGoals) {
+        c.losses += 1;
+        c.coachRating = clamp(c.coachRating - 2, 0, 100);
+        result = "loss";
+      } else {
+        c.draws += 1;
+        c.coachRating = clamp(c.coachRating + 1, 0, 100);
+        result = "draw";
+      }
+
+      c.history.unshift({
+        opponent: match.rival.name,
+        homeGoals: match.homeGoals,
+        awayGoals: match.awayGoals,
+        result,
+        motm: match.motm.name,
+        formation: getFormation().label,
+        date: new Date().toLocaleDateString("ru-RU")
+      });
+      c.history = c.history.slice(0, 8);
+    }
+
+    function updateCareer() {
+      const c = state.career;
+      els.matches.textContent = c.matches;
+      els.wins.textContent = c.wins;
+      els.draws.textContent = c.draws;
+      els.losses.textContent = c.losses;
+      els.coachRatingPill.textContent = `Рейтинг ${c.coachRating}`;
+      els.coachRatingPill.className = `pill ${c.coachRating >= 55 ? "good" : c.coachRating < 45 ? "bad" : ""}`;
+
+      if (!c.history.length) {
+        els.history.innerHTML = `<div class="history-empty">История появится после первого матча.</div>`;
+        return;
+      }
+
+      els.history.innerHTML = c.history.map(item => `
+        <div class="history-item">
+          <div>
+            <div class="history-title">${clubName()} — ${item.opponent}</div>
+            <div class="history-meta">${item.date} · ${item.formation} · MVP: ${shortName(item.motm)}</div>
+          </div>
+          <div class="history-score ${item.result}">${item.homeGoals}:${item.awayGoals}</div>
+        </div>
+      `).join("");
+    }
+
+    function saveState() {
+      const data = {
+        selected: state.selected,
+        career: state.career,
+        settings: {
+          clubName: els.clubName.value,
+          opponent: els.opponent.value,
+          formation: els.formation.value,
+          style: els.style.value,
+          pressing: els.pressing.value,
+          highLine: els.highLine.value,
+          tempo: els.tempo.value
+        }
+      };
+      localStorage.setItem("worldStarsManagerPro", JSON.stringify(data));
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("worldStarsManagerPro"));
+        if (!saved) return;
+        state.selected = Array.isArray(saved.selected) ? saved.selected.filter(index => players[index]) : [];
+        if (saved.career) state.career = { ...state.career, ...saved.career };
+        if (saved.settings) {
+          els.clubName.value = saved.settings.clubName || "World Stars FC";
+          els.opponent.value = saved.settings.opponent || "0";
+          els.formation.value = saved.settings.formation || "433";
+          els.style.value = saved.settings.style || "balanced";
+          els.pressing.value = saved.settings.pressing || "55";
+          els.highLine.value = saved.settings.highLine || "50";
+          els.tempo.value = saved.settings.tempo || "55";
+        }
+      } catch (error) {
+        console.warn("Не удалось загрузить сохранение", error);
+      }
+    }
+
+    function showToast(text) {
+      els.toast.textContent = text;
+      els.toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => els.toast.classList.remove("show"), 2600);
+    }
+
+    function currentOpponent() { return opponents[Number(els.opponent.value)] || opponents[0]; }
+    function clubName() { return els.clubName.value.trim() || "World Stars FC"; }
+
+    function positionName(pos) {
+      return ({ GK: "Вратарь", DF: "Защитник", MF: "Полузащитник", FW: "Нападающий" })[pos] || pos;
+    }
+
+    function shortName(name) {
+      const parts = name.split(" ");
+      return parts.length > 1 ? parts[parts.length - 1] : name;
+    }
+
+    function poisson(lambda) {
+      const limit = Math.exp(-lambda);
+      let product = 1;
+      let count = 0;
+      do {
+        count++;
+        product *= Math.random();
+      } while (product > limit && count < 8);
+      return Math.min(count - 1, 6);
+    }
+
+    function uniqueMinutes(count, min, max) {
+      const result = new Set();
+      while (result.size < count) result.add(randomInt(min, max));
+      return [...result].sort((a, b) => a - b);
+    }
+
+    function weightedPick(items, weightFn) {
+      if (!items.length) return null;
+      const weights = items.map(item => Math.max(1, weightFn(item)));
+      const total = weights.reduce((sum, weight) => sum + weight, 0);
+      let roll = Math.random() * total;
+      for (let i = 0; i < items.length; i++) {
+        roll -= weights[i];
+        if (roll <= 0) return items[i];
+      }
+      return items[items.length - 1];
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function randomItem(array) { return array[Math.floor(Math.random() * array.length)]; }
+    function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function randomBetween(min, max) { return Math.random() * (max - min) + min; }
+    function average(values) { return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0; }
+    function round1(value) { return Math.round(value * 10) / 10; }
+    function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+
+    init();
+  </script>
+</body>
+</html>
